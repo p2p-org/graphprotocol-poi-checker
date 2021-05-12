@@ -2,6 +2,9 @@
 Python3 script to check POI across multi indexers for defined subgraph.
 
 ## Usage example:
+
+Never share poe for open allocations!!!!!!
+
 ```bash
 $ python3 check_poi.py --help
 

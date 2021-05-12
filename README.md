@@ -1,7 +1,7 @@
 # graphprotocol-poi-checker
 Python3 script to check POI across multi indexers for defined subgraph.
 
-Usage example:
+##Usage example:
 ```bash
 $ python3 check_poi.py --help
 
@@ -23,5 +23,6 @@ optional arguments:
                         number of last closed allocation to check poi (default: 10)
 ```
 
-Requirements:
+##Requirements:
+
 ```pip3 install -r requirements.txt```

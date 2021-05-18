@@ -51,16 +51,32 @@ def generate_poi(indexer_id, block_number, block_hash, subgraph_ipfs_hash):
 
 def get_indexers_poi_epoch(subgraph):
     indexers_poi_epoch = []
-    t = Template("""query MyQuery {
-      allocations(where: {subgraphDeployment: "$subgraph", status_not: Active }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
-        closedAtEpoch
-        indexer {
-         id
-        }
-        poi
-      }
-    }""")
-    query_data = t.substitute(subgraph=subgraph,number_allocation_to_check=number_allocation_to_check)
+    if indexers_list == "all":
+        t = Template("""query MyQuery {
+          allocations(where: {subgraphDeployment: "$subgraph", status_not: Active }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
+            closedAtEpoch
+            indexer {
+             id
+            }
+            poi
+          }
+        }""")
+        query_data = t.substitute(subgraph=subgraph,
+            number_allocation_to_check=number_allocation_to_check)
+    else:
+        t = Template("""query MyQuery {
+          allocations(where: {subgraphDeployment: "$subgraph", status_not: Active, indexer_in: $indexers_list }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
+            closedAtEpoch
+            indexer {
+             id
+            }
+            poi
+          }
+        }""")
+        query_data = t.substitute(subgraph=subgraph,
+            number_allocation_to_check=number_allocation_to_check,
+            indexers_list=indexers_list)
+
     request = requests.post(graph_endpoint, json={'query': query_data})
 
     if request.status_code != 200:
@@ -135,6 +151,12 @@ def get_start_block_hash(epoch_start_block):
 
     return response["result"]["hash"]
 
+#Dirty hack to replace ' for "
+def convert_to_proper_indexer_list(indexers_list):
+    indexers_list_array = indexers_list.split(",")
+    indexers_list_converted = str(indexers_list_array).replace("'","\"")
+    return indexers_list_converted
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--subgraph_ipfs_hash',
@@ -157,6 +179,10 @@ if __name__ == "__main__":
         help='number of last closed allocation to check poi (default: %(default)s)',
         default=10,
         type=int)
+    parser.add_argument('--indexers_list',
+        help='comma separated list of indexers to check poi with (default: %(default)s)',
+        default="all",
+        type=str)
     args = parser.parse_args()
 
     subgraph_ipfs_hash = args.subgraph_ipfs_hash
@@ -164,6 +190,7 @@ if __name__ == "__main__":
     local_index_node_endpoint = args.local_index_node_endpoint
     block_hash_endpoint = args.block_hash_endpoint
     number_allocation_to_check = args.number_allocation_to_check
+    indexers_list = convert_to_proper_indexer_list(args.indexers_list)
 
     print('Start to check POI for subgraph: {}'.format(subgraph_ipfs_hash))
 

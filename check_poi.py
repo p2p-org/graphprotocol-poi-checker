@@ -51,7 +51,7 @@ def generate_poi(indexer_id, block_number, block_hash, subgraph_ipfs_hash):
 
 def get_indexers_poi_epoch(subgraph):
     indexers_poi_epoch = []
-    if indexers_list == "all":
+    if indexers_list == '["all"]':
         t = Template("""query MyQuery {
           allocations(where: {subgraphDeployment: "$subgraph", status_not: Active }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
             closedAtEpoch

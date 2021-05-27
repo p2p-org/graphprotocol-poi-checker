@@ -206,7 +206,13 @@ if __name__ == "__main__":
 
        print()
        if my_poi != i["poi"]:
-         print("FAILED: POI missmatched with indexer {0}. Generated POI: {1} Indexer POI: {2} Allocation was closed in {3} EPOCH". format(i["indexer_id"], my_poi, i["poi"], i["epoch"]))
+         previous_start_block = get_start_block(i["epoch"]-1)
+         previous_start_block_hash = get_start_block_hash(previous_start_block)
+         previous_my_poi = generate_poi(i["indexer_id"], previous_start_block, previous_start_block_hash, subgraph_ipfs_hash)
+         if previous_my_poi != i["poi"]:
+             print("FAILED: POI missmatched with indexer {0}. Generated POI: {1} Indexer POI: {2} Allocation was closed in {3} EPOCH". format(i["indexer_id"], my_poi, i["poi"], i["epoch"]))
+         else:
+             print("OK: POI matched with indexer {0} for epoch {2}. Allocation was closed in {1} EPOCH.".format(i["indexer_id"], i["epoch"], i["epoch"]-1))
          print()
        else:
          print("OK: POI matched with indexer {0}. Allocation was closed in {1} EPOCH".format(i["indexer_id"], i["epoch"]))

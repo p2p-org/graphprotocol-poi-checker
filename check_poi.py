@@ -49,6 +49,12 @@ def generate_poi(indexer_id, block_number, block_hash, subgraph_ipfs_hash):
 
     return json_response["data"]["proofOfIndexing"]
 
+def convert_tokens(amount):
+    if len(amount) <= 16:
+        return "~0"
+    else:
+        return str(amount[:-18])
+
 def get_indexers_poi_epoch(subgraph):
     indexers_poi_epoch = []
     if indexers_list == '["all"]':
@@ -58,6 +64,7 @@ def get_indexers_poi_epoch(subgraph):
             indexer {
              id
             }
+            allocatedTokens
             poi
           }
         }""")
@@ -71,6 +78,7 @@ def get_indexers_poi_epoch(subgraph):
              id
             }
             poi
+            allocatedTokens
           }
         }""")
         query_data = t.substitute(subgraph=subgraph,
@@ -92,7 +100,7 @@ def get_indexers_poi_epoch(subgraph):
         os._exit(1)
 
     for i in json_response["data"]["allocations"]:
-        indexers_poi_epoch.append({"indexer_id": i["indexer"]["id"], "epoch": i["closedAtEpoch"], "poi": i["poi"]})
+        indexers_poi_epoch.append({"indexer_id": i["indexer"]["id"], "epoch": i["closedAtEpoch"], "poi": i["poi"], "allocatedTokens": convert_tokens(str(i["allocatedTokens"]))})
 
     return indexers_poi_epoch
 
@@ -210,11 +218,11 @@ if __name__ == "__main__":
          previous_start_block_hash = get_start_block_hash(previous_start_block)
          previous_my_poi = generate_poi(i["indexer_id"], previous_start_block, previous_start_block_hash, subgraph_ipfs_hash)
          if previous_my_poi != i["poi"]:
-             print("FAILED: POI missmatched with indexer {0}. Generated POI: {1} Indexer POI: {2} Allocation was closed in {3} EPOCH". format(i["indexer_id"], my_poi, i["poi"], i["epoch"]))
+             print("FAILED: POI missmatched with indexer {0}. Generated POI: {1} Indexer POI: {2} Allocation was closed in {3} EPOCH. Allocated Tokens: {4}". format(i["indexer_id"], my_poi, i["poi"], i["epoch"], i["allocatedTokens"]))
          else:
-             print("OK: POI matched with indexer {0} for epoch {2}. Allocation was closed in {1} EPOCH.".format(i["indexer_id"], i["epoch"], i["epoch"]-1))
+             print("OK: POI matched with indexer {0} for epoch {2}. Allocation was closed in {1} EPOCH. Allocated Tokens: {3}".format(i["indexer_id"], i["epoch"], i["epoch"]-1, i["allocatedTokens"]))
          print()
        else:
-         print("OK: POI matched with indexer {0}. Allocation was closed in {1} EPOCH".format(i["indexer_id"], i["epoch"]))
+         print("OK: POI matched with indexer {0}. Allocation was closed in {1} EPOCH. Allocated Tokens: {2}".format(i["indexer_id"], i["epoch"], i["allocatedTokens"]))
          print()
 

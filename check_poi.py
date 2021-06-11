@@ -50,7 +50,7 @@ def generate_poi(indexer_id, block_number, block_hash, subgraph_ipfs_hash):
     return json_response["data"]["proofOfIndexing"]
 
 def convert_tokens(amount):
-    if len(amount) <= 16:
+    if len(amount) <= 18:
         return "~0"
     else:
         return str(amount[:-18])

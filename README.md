@@ -33,6 +33,7 @@ optional arguments:
   --indexers_list INDEXERS_LIST
                         comma separated list of indexers to check poi with
                         (default: all)
+  --no-zero-pois        do not include allocations with zero pois (default: False)
 
 ```
 

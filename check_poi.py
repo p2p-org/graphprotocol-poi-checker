@@ -55,11 +55,11 @@ def convert_tokens(amount):
     else:
         return str(amount[:-18])
 
-def get_indexers_poi_epoch(subgraph):
+def get_indexers_poi_epoch(subgraph, zero_pois):
     indexers_poi_epoch = []
     if indexers_list == '["all"]':
         t = Template("""query MyQuery {
-          allocations(where: {subgraphDeployment: "$subgraph", status_not: Active }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
+          allocations(where: {subgraphDeployment: "$subgraph", $zero_pois status_not: Active }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
             closedAtEpoch
             indexer {
              id
@@ -69,10 +69,11 @@ def get_indexers_poi_epoch(subgraph):
           }
         }""")
         query_data = t.substitute(subgraph=subgraph,
-            number_allocation_to_check=number_allocation_to_check)
+            number_allocation_to_check=number_allocation_to_check,
+            zero_pois=zero_pois)
     else:
         t = Template("""query MyQuery {
-          allocations(where: {subgraphDeployment: "$subgraph", status_not: Active, indexer_in: $indexers_list }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
+          allocations(where: {subgraphDeployment: "$subgraph", $zero_pois status_not: Active, indexer_in: $indexers_list }, first: $number_allocation_to_check, orderBy: closedAtEpoch, orderDirection: desc) {
             closedAtEpoch
             indexer {
              id
@@ -83,7 +84,8 @@ def get_indexers_poi_epoch(subgraph):
         }""")
         query_data = t.substitute(subgraph=subgraph,
             number_allocation_to_check=number_allocation_to_check,
-            indexers_list=indexers_list)
+            indexers_list=indexers_list,
+            zero_pois=zero_pois)
 
     request = requests.post(graph_endpoint, json={'query': query_data})
 
@@ -191,6 +193,9 @@ if __name__ == "__main__":
         help='comma separated list of indexers to check poi with (default: %(default)s)',
         default="all",
         type=str)
+    parser.add_argument('--no-zero-pois',
+        help='do not include allocations with zero pois (default: %(default)s)',
+        action='store_true')
     args = parser.parse_args()
 
     subgraph_ipfs_hash = args.subgraph_ipfs_hash
@@ -200,12 +205,17 @@ if __name__ == "__main__":
     number_allocation_to_check = args.number_allocation_to_check
     indexers_list = convert_to_proper_indexer_list(args.indexers_list)
 
+    if args.no_zero_pois:
+        zero_pois = 'poi_not: "0x0000000000000000000000000000000000000000000000000000000000000000",'
+    else:
+        zero_pois = ""
+
     print('Start to check POI for subgraph: {}'.format(subgraph_ipfs_hash))
 
     subgraph_deployment_id = to_id(subgraph_ipfs_hash)
     current_epoch = get_current_epoch()
     print("Current Epoch: {}".format(current_epoch))
-    indexers_poi_epoch = get_indexers_poi_epoch(subgraph_deployment_id)
+    indexers_poi_epoch = get_indexers_poi_epoch(subgraph_deployment_id, zero_pois)
 
     for i in indexers_poi_epoch:
        start_block = get_start_block(i["epoch"])

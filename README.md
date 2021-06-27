@@ -13,6 +13,8 @@ usage: check_poi.py [-h] --subgraph_ipfs_hash SUBGRAPH_IPFS_HASH
                     [--block_hash_endpoint BLOCK_HASH_ENDPOINT]
                     [--number_allocation_to_check NUMBER_ALLOCATION_TO_CHECK]
                     [--indexers_list INDEXERS_LIST]
+                    [--no_zero_pois]
+                    [--my_indexer_id MY_INDEXER_ID]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -35,6 +37,10 @@ optional arguments:
                         (default: all)
   --no-zero-pois        do not include allocations with zero pois (default: False)
 
+  --my_indexer_id MY_INDEXER_ID
+                        You can get info about your own POI if you need 
+                        to close allocation with your previous epoch POI.
+                        (default: "") 
 ```
 
 ## Requirements:

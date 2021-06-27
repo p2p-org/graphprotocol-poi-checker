@@ -193,9 +193,13 @@ if __name__ == "__main__":
         help='comma separated list of indexers to check poi with (default: %(default)s)',
         default="all",
         type=str)
-    parser.add_argument('--no-zero-pois',
+    parser.add_argument('--no_zero_pois',
         help='do not include allocations with zero pois (default: %(default)s)',
         action='store_true')
+    parser.add_argument('--my_indexer_id',
+        help='You can get info about your indexer if you want. (default: %(default)s)',
+        default="",
+        type=str)
     args = parser.parse_args()
 
     subgraph_ipfs_hash = args.subgraph_ipfs_hash
@@ -204,6 +208,7 @@ if __name__ == "__main__":
     block_hash_endpoint = args.block_hash_endpoint
     number_allocation_to_check = args.number_allocation_to_check
     indexers_list = convert_to_proper_indexer_list(args.indexers_list)
+    indexer_id_arg = args.my_indexer_id
 
     if args.no_zero_pois:
         zero_pois = 'poi_not: "0x0000000000000000000000000000000000000000000000000000000000000000",'
@@ -216,6 +221,20 @@ if __name__ == "__main__":
     current_epoch = get_current_epoch()
     print("Current Epoch: {}".format(current_epoch))
     indexers_poi_epoch = get_indexers_poi_epoch(subgraph_deployment_id, zero_pois)
+
+    if indexer_id_arg != "":
+       indexer_id = indexer_id_arg.lower()
+       start_block = get_start_block(current_epoch)
+       start_block_hash = get_start_block_hash(start_block)
+       my_poi = generate_poi(indexer_id, start_block, start_block_hash, subgraph_ipfs_hash)
+       print("Your latest POI is " + str(my_poi) + " for epoch: " + str(current_epoch))
+
+       previous_start_block = get_start_block(current_epoch-1)
+       previous_start_block_hash = get_start_block_hash(previous_start_block)
+       previous_my_poi = generate_poi(indexer_id, previous_start_block, previous_start_block_hash, subgraph_ipfs_hash)
+       print("Your previous POI is " + str(previous_my_poi) + " for epoch: " + str(current_epoch-1))
+    else:
+       print("You can use --my_indexer_id to get more info")
 
     for i in indexers_poi_epoch:
        start_block = get_start_block(i["epoch"])

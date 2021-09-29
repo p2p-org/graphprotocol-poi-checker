@@ -4,7 +4,8 @@ name: Security checks
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+  schedule:
+    - cron: "0 13 * * 1"
   push:
     branches: [ main ]
   pull_request:

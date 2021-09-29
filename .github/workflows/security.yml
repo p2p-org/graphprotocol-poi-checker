@@ -1,4 +1,4 @@
-# Security check for the requeriment.txt file
+# Security check for the requeriments.txt file
 name: Security checks
 
 on:

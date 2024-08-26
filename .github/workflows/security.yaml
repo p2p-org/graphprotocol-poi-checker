@@ -12,3 +12,8 @@ jobs:
   sca:
     uses: p2p-org/security-workflows/.github/workflows/sca.yaml@main
     secrets: inherit
+  docker-scan:
+    uses: p2p-org/security-workflows/.github/workflows/docker-scan.yaml@main
+    secrets: inherit
+    with:
+      image_name: ${{ github.repository }}

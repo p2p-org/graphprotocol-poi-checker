@@ -1,17 +1,19 @@
 name: Security Testing
 
 on:
+  workflow_dispatch:
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize ]
 
 jobs:
   sast:
     uses: p2p-org/security-workflows/.github/workflows/sast.yaml@main
     secrets: inherit
+  sca:
+    uses: p2p-org/security-workflows/.github/workflows/sca.yaml@main
+    secrets: inherit
   docker-scan:
     uses: p2p-org/security-workflows/.github/workflows/docker-scan.yaml@main
+    secrets: inherit
     with:
       image_name: ${{ github.repository }}
-      docker_file_path: 'Dockerfile'
-      workdir: '.'
-    secrets: inherit
